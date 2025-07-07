@@ -36,7 +36,15 @@ This project demonstrates the effect of fine-tuning a small language model (Dist
 
 ## References
 - [Hugging Face Transformers](https://huggingface.co/transformers/)
-- [Rotten Tomatoes Dataset](https://huggingface.co/datasets/rotten_tomatoes)
+- [Rotten Tomatoes Dataset](https://huggingface.co/datasets)
+
+## App Images
+
+![img 1](screenshots/ft-llm-1.png)
+
+
+![img 2](screenshots/ft-llm-2.png)
+
 
 ---
 

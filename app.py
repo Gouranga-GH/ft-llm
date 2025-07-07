@@ -133,11 +133,6 @@ if st.button("Generate Review"):
     st.subheader("After Fine-Tuning (Fine-Tuned Model):")
     st.write(after)
 
-st.markdown("---")
-st.markdown("**References:**")
-st.markdown("- [Hugging Face Transformers](https://huggingface.co/transformers/)")
-st.markdown("- [Rotten Tomatoes Dataset](https://huggingface.co/datasets/rotten_tomatoes)")
-
 # Clean up temp file
 if os.path.exists(train_file):
     os.remove(train_file) 
