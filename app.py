@@ -1,12 +1,25 @@
-import streamlit as st
-import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, Trainer, TrainingArguments, TextDataset, DataCollatorForLanguageModeling
-from datasets import load_dataset
-import os
-from peft import get_peft_model, LoraConfig, PeftModel, PeftConfig
+# --- Imports: Libraries for UI, ML, Data, and Fine-Tuning ---
+import streamlit as st  # For building the web app UI
+import torch  # PyTorch: Deep learning backend for model operations
+from transformers import (
+    AutoModelForCausalLM,  # Loads a Small language model
+    AutoTokenizer,         # Loads the tokenizer for the model
+    Trainer,               # High-level API for model training
+    TrainingArguments,     # Configuration for training
+    TextDataset,           # Utility for creating datasets from text files
+    DataCollatorForLanguageModeling  # Prepares batches for language modeling
+)
+from datasets import load_dataset  # For loading datasets from Hugging Face Hub
+import os  # For file and directory operations
+from peft import (
+    get_peft_model,  # Applies PEFT (e.g., LoRA) to a model
+    LoraConfig,      # Configuration for LoRA fine-tuning
+    PeftModel,       # Loads a model with PEFT adapters
+    PeftConfig       # Loads PEFT configuration
+)
 
 # -------------------------------
-# 1. Load Pretrained Model & Tokenizer (Step similar to Gemma notebook)
+# 1. Load Pretrained Model & Tokenizer
 # -------------------------------
 MODEL_NAME = "distilgpt2"
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
@@ -15,15 +28,16 @@ model = AutoModelForCausalLM.from_pretrained(MODEL_NAME)
 # -------------------------------
 # LoRA Configuration (PEFT)
 # -------------------------------
+# LoRA (Low-Rank Adaptation) enables efficient fine-tuning by injecting trainable rank-decomposition matrices into certain layers
 lora_config = LoraConfig(
-    r=8,
-    lora_alpha=16,
-    target_modules=["c_attn", "c_proj"],
-    lora_dropout=0.05,
-    bias="none",
-    task_type="CAUSAL_LM"
+    r=8,  # Rank of the LoRA update matrices (trade-off between efficiency and capacity)
+    lora_alpha=16,  # Scaling factor for LoRA updates
+    target_modules=["c_attn", "c_proj"],  # Which modules in the model to apply LoRA to (attention and projection layers)
+    lora_dropout=0.05,  # Dropout rate for LoRA layers (regularization)
+    bias="none",  # Whether to train bias parameters ("none" means no bias is trained)
+    task_type="CAUSAL_LM"  # Specifies this is for causal language modeling (like GPT-2)
 )
-model = get_peft_model(model, lora_config)
+model = get_peft_model(model, lora_config)  # Wrap the model with LoRA adapters for efficient fine-tuning
 
 # -------------------------------
 # 2. Prepare a Small Dataset (Step similar to loading quotes in Gemma notebook)
@@ -35,7 +49,7 @@ dataset = load_dataset("rotten_tomatoes", split="train[:100]")  # Only 100 sampl
 train_file = "train_reviews.txt"
 with open(train_file, "w", encoding="utf-8") as f:
     for review in dataset["text"]:
-        f.write(review.replace("\n", " ") + "\n")
+        f.write(review.replace("\n", " ") + "\n") # Multiline text to single line
 
 # -------------------------------
 # 3. Create TextDataset and DataCollator (Tokenization step)
@@ -53,7 +67,7 @@ data_collator = DataCollatorForLanguageModeling(
 )
 
 # -------------------------------
-# 4. Fine-tune the Model (Trainer setup and training, like Gemma notebook)
+# 4. Fine-tune the Model (Trainer setup and training)
 # -------------------------------
 finetuned_model_dir = "finetuned_distilgpt2_lora"
 if not os.path.exists(finetuned_model_dir):
